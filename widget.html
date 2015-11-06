@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<script src="d3.js" charset="utf-8"> </script>
+<script type="text/javascript" src="index.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<script>
+
+function addGroup(filter, selector, meta, url) {
+	if(arguments.length < 4) {
+		alert("must be at least 3 arguments");
+		return;
+	}
+	var dataSet = {};
+	var metaData;
+	//metaData = getMeta(selector);
+	metaData = meta;
+	/////////////////////////	Process urls  /////////////////////////
+	var len = arguments.length;
+	var numfiles = len - 3;
+	for (var i = 3; i < len; i++) {
+		d3.json(arguments[i], function(error, json) {
+			if(error) return console.warn(error);
+			addToDataSet(dataSet,filter, selector, json);
+			if(dataSet['groups'].length == numfiles ){
+				drawChart(metaData,dataSet);
+			}
+	    });
+	}
+}
+
+/* Filters data via the given selector
+ * filter: An array of selectors to use to walk through the data.
+ * selector: An array of selectors to apply to each filtered data point.
+ */
+function addToDataSet(dataSet,filter, selector, data) {
+  var subData = data;
+  
+  filter.forEach(function(key) {
+    subData = subData[key];
+  });
+
+  var data = [];
+  subData.forEach(function(subElement) {
+    selector.forEach(function(key) {
+      subElement = subElement[selector];
+    });
+    data.push(subElement);
+  });
+
+  dataSet['groups'] = dataSet['groups'] || [];
+  dataSet['groups'].push(data);
+}
+
+//		Add metadata (units, legend,etc)		Not using it now
+function getMeta(selector){
+	var metaData = [];
+	var label, unit;
+
+	selector.forEach(function(key){
+		var metaElement = [];
+	
+		if(key == "latency"){
+		label = "Latency";
+		unit = "Nanoseconds";
+		}
+		else if(key == "bandwidth"){
+		label = "Bandwidth";
+		unit = "GB/Sec";
+		}
+		else{
+		label = "";
+		unit = "";
+		}
+		metaElement["label"] = label;
+		metaElement["unit"] = unit;
+		metaData.push(metaElement);
+	});
+	return metaData;
+}
+
+function drawChart(metaData,dataSet){
+	
+	var data = dataSet['groups'];
+	var n = data[0].length, // number of samples
+    m = data.length; // number of series	
+
+	//	Fix later
+	//var unit = metaData[0].unit;
+	//var label = metaData[0].label;
+	var label = metaData[0];
+	var unit = metaData[1];
+	var Xlabels = metaData[2];
+	var legend_labels = metaData[3];
+	
+	var maxGroups = data.map(function(array) { return Math.max.apply(null, array); });
+	
+	//	Ask Dave
+	
+	var minGroups = data.map(function(array) { return Math.min.apply(null, array); });
+	var maxY = Math.max.apply(null, maxGroups);
+	var minY = Math.min.apply(null, minGroups);
+	var startingY = maxY / 2;
+	if(minY < startingY){
+		startingY = 0;
+	}
+	
+	var margin = {top: 20, right: 30, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+	
+	var x0 = d3.scale.ordinal()	//  x axis
+	.domain(Xlabels)
+	.rangeRoundBands([0, width], .1);
+	
+	var x1 = d3.scale.ordinal()  // rectangle width
+	.domain(legend_labels).rangeRoundBands([0, x0.rangeBand()]);
+    
+	var y = d3.scale.linear()  //  y axis
+	.range([height, 0])
+	.domain([startingY, maxY]);
+    
+	var z = d3.scale.category20();
+	
+	var xAxis = d3.svg.axis()
+    .scale(x0)
+    .orient("bottom");
+
+	var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+	
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d) {
+		return "<strong>" + label + ":</strong> <span style='color:red'>" + d + "</span>";
+	});
+	
+	var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	//		Tooltip
+	svg.call(tip);
+	
+	//		Axis
+	svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+	svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+	  .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text(unit);
+	
+	//		Label
+	svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 0 - (margin.top/3))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "18px") 
+        .style("text-decoration", "underline")  
+        .text(label);
+	
+	//		Groups
+	svg.append("g").selectAll("g")
+    .data(data)
+	.enter().append("g")
+    .style("fill", function(d, i) { return z(i); })
+    .attr("transform", function(d, i) { console.log("group i " + i); return "translate(" + x1(legend_labels[i]) + ",0)"; })
+	
+	//		Rectangles
+	.selectAll("rect")
+    .data(function(d){return d;})
+    .enter()
+	.append("rect")
+	.attr("class","bar")
+    .attr("width", x1.rangeBand())
+	.attr("height", function(d) { return height - y(d); })
+    .attr("x", function(d, i) { console.log("rect i " + i); return x0(Xlabels[i]); })
+	.attr("y", y)
+	.on('mouseover', tip.show)
+    .on('mouseout', tip.hide)
+	;
+	
+	//		Legend
+	var legend = svg.selectAll(".legend")
+	.data(legend_labels)
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+	legend.append("rect")
+    .attr("x", width - 18)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill",function(d, i) { return z(i); });
+
+	legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(function(d) { return d; });
+	
+	////////////////////////////////////////////////////////////
+	
+}
+
+</script>
+
+</head>
+
+<body>
+
+<script>
+
+
+addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1"]],"occam_data.json");
+addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1","Output 2","Output 3"]],"occam_data.json","occam_data2.json","occam_data3.json");
+addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1"]],"occam_data2.json");
+addGroup(["channels", 0, "ranks", 0, "banks"],["latency"],[["Latency"],["Nanoseconds"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1","Output 2"]],"occam_data2.json","occam_data3.json");
+
+
+</script>
+
+</br></br>
+
+</body>
+</html>
