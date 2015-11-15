@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<script src="d3.js" charset="utf-8"> </script>
+<script type="text/javascript" src="index.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<script>
+
+function addGroup(filter, selector, meta, url) {
+	if(arguments.length < 4) {
+		alert("must be at least 3 arguments");
+		return;
+	}
+	var dataSet = {};
+	var metaData;
+	//metaData = getMeta(selector);
+	metaData = meta;
+	/////////////////////////	Process urls  /////////////////////////
+	var len = arguments.length;
+	var numfiles = len - 3;
+	for (var i = 3; i < len; i++) {
+		d3.json(arguments[i], function(error, json) {
+			if(error) return console.warn(error);
+			addToDataSet(dataSet,filter, selector, json);
+			if(dataSet['groups'].length == numfiles ){
+				drawChart(metaData,dataSet);
+				drawLineGraph(metaData,dataSet);
+			}
+	    });
+	}
+}
+
+/* Filters data via the given selector
+ * filter: An array of selectors to use to walk through the data.
+ * selector: An array of selectors to apply to each filtered data point.
+ */
+function addToDataSet(dataSet,filter, selector, data) {
+  var subData = data;
+  
+  filter.forEach(function(key) {
+    subData = subData[key];
+  });
+
+  var data = [];
+  subData.forEach(function(subElement) {
+    selector.forEach(function(key) {
+      subElement = subElement[selector];
+    });
+    data.push(subElement);
+  });
+
+  dataSet['groups'] = dataSet['groups'] || [];
+  dataSet['groups'].push(data);
+}
+
+function drawLineGraph(metaData,dataSet){
+	
+	var data = dataSet['groups'];
+	var n = data[0].length, // number of samples
+    m = data.length; // number of series	
+
+	var label = metaData[0];
+	var unit = metaData[1];
+	var Xlabels = metaData[2];
+	var legend_labels = metaData[3];
+	
+	var maxY = d3.max(data, function(d){return d3.max(d)});
+	var minY = d3.min(data, function(d){return d3.min(d)});
+	var startingY = maxY / 2;
+	if(minY < startingY){
+		startingY = 0;
+	}
+	
+	var margin = {top: 20, right: 100, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+	
+	var x0 = d3.scale.ordinal()	//  x axis
+	.domain(Xlabels)
+	.rangeRoundBands([0, width], .1);
+    
+	var y = d3.scale.linear()  //  y axis
+	.range([height, 0])
+	.domain([startingY, maxY]);
+    
+	var z = d3.scale.category10();
+	
+	var xAxis = d3.svg.axis()
+    .scale(x0)
+    .orient("bottom");
+
+	var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+	
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d,i) {
+		return "<strong>" + Xlabels[i] + ":</strong> <span style='color:red'>" + d + "</span>";
+	});
+	
+	// where the line gets its properties, how it will be interpolated
+    var line = d3.svg.line()
+       .interpolate("monotone")
+       .x(function(d,i) { return x0(Xlabels[i]) + x0.rangeBand()/2; })
+       .y(function(d) { return y(d); })
+	   ;
+	
+	var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		
+	svg.call(tip);
+	
+	svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+	svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+	  .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text(unit);
+	
+	svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 0 - (margin.top/3))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "18px") 
+        .style("text-decoration", "underline")  
+        .text(label);
+	
+	var graph = svg.append("g")
+	.attr("class", "graph")
+	.selectAll("g")
+    .data(data)
+	.enter()
+	.append("g");
+	
+	graph.append("path")
+	.attr("class", "line")
+	.attr("d", function(d,i) { return line(d,i); })
+	.style("stroke", function(d, i) { return z(legend_labels[i]); })
+	;
+	
+	graph.append("text")
+    .attr("class", "names")
+	.attr("transform", function(d) { return "translate(" + (width) + "," + y(d[d.length-1]) + ")"; })
+    .attr("x", 4)
+    .attr("dy", ".35em")
+    .text(function(d,i) { return legend_labels[i]; });
+	
+	graph.selectAll(".data_point")
+	.data(function(d){return d;})
+	.enter()
+	.append('svg:circle')
+	.attr('class', 'data_point')
+	.attr('fill', 'black')
+	.attr('cx', function(d,i) { return x0(Xlabels[i]) + x0.rangeBand()/2; })
+	.attr('cy', function(d) { return y(d); })
+	.attr('r', function() { return 4; })
+	.on("mouseover", function(d,i) {
+  		d3.select(this)
+		.attr("r", 8)
+		.transition()
+      	.duration(750);
+		tip.show(d,i);
+	})
+	.on("mouseout", function(d,i) {
+  		d3.select(this)
+		.attr("r", 4)
+		.transition()
+      	.duration(750);
+		tip.hide(d,i);
+	})
+	;
+		
+	////////////////////////////////////////////////////////////
+	
+}
+
+</script>
+
+</head>
+
+<body>
+
+<!--	GETTING DATA   -->
+<script>
+
+
+
+//addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1"]],"occam_data.json");
+//addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1","Output 2","Output 3"]],"occam_data.json","occam_data2.json","occam_data3.json");
+//addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1"]],"occam_data2.json");
+//addGroup(["channels", 0, "ranks", 0, "banks"],["latency"],[["Latency"],["Nanoseconds"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1","Output 2"]],"occam_data2.json","occam_data3.json");
+addGroup(["channels", 0, "ranks", 0, "banks"],["bandwidth"],[["Bandwidth"],["GB/Sec"],["Bank 1","Bank 2","Bank 3","Bank 4","Bank 5","Bank 6","Bank 7","Bank 8"],["Output 1234567890","Output 2","Output 3"]],"occam_data.json","occam_data2.json","occam_data3.json");
+
+
+</script>
+
+
+</br></br>
+
+</body>
+</html>
