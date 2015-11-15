@@ -13,6 +13,19 @@
   <!--display: none;-->
 }
 
+.line {
+  fill: none;
+  stroke-width: 9px;
+  /*opacity: 0.3;*/
+}
+
+/*.line:hover {opacity:1;}*/
+
+.data_point {
+  stroke: white;
+  stroke-width: 3px;
+}
+
 .bar:hover {
   fill: firebrick ;
 }
