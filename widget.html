@@ -108,7 +108,7 @@ function drawChart(metaData,dataSet){
 		startingY = 0;
 	}
 	
-	var margin = {top: 20, right: 30, bottom: 30, left: 40},
+	var margin = {top: 20, right: 100, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 	
@@ -203,16 +203,16 @@ function drawChart(metaData,dataSet){
     .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
 	legend.append("rect")
-    .attr("x", width - 18)
+    .attr("x", width)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill",function(d, i) { return z(i); });
 
 	legend.append("text")
-    .attr("x", width - 24)
+    .attr("x", width + 18)
     .attr("y", 9)
     .attr("dy", ".35em")
-    .style("text-anchor", "end")
+    //.style("text-anchor", "end")
     .text(function(d) { return d; });
 	
 	////////////////////////////////////////////////////////////
