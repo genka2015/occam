@@ -8,7 +8,6 @@ var graph = {
 
     backgroundColor: "#FFFFFF",
     textColor: "#ccc",
-	//showlegend: true,
 	
     domains: {
       x: {
