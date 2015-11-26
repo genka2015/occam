@@ -25,7 +25,7 @@ var graph = {
         }, {
           name: "tar"
         }, {
-		  name: "blob"
+		  name: "etc"
 		}],
 
         // The overall label for the axis
@@ -58,7 +58,7 @@ var graph = {
         name:        "gcc",
 		
 		// Type for group  
-		type: 		 "scatter",
+		type: 		 "surface",
 		
         // Color for this group
         color:       "hsl(120, 60%, 60%)",
@@ -80,6 +80,12 @@ var graph = {
 		
 		//  any combination of "lines" "markers" "text" joined with "+" or "none"
 		mode: "",
+		
+		//	fill area "none" | "tozeroy" | "tozerox" | "tonexty" | "tonextx" )
+		fill: "",
+		
+		// fill color
+		filcolor: "",
 		
 		//	line
 		line:{
@@ -110,9 +116,9 @@ var graph = {
 			},
 		}
       },
-      {
+      /*{
 		name:        "clang clang clang",
-		type:		 "scatter",
+		type:		 "surface",
         color:       "hsl(0, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -120,6 +126,8 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		fill: "",
+		fillcolor: "",
 		line:{
 			width: 3,
 			shape: "spline",
@@ -142,7 +150,7 @@ var graph = {
       },
       {
 		name:        "msc",
-		type:		 "scatter",
+		type:		 "surface",
         color:       "hsl(180, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -150,6 +158,8 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		fill: "",
+		fillcolor: "",
 		line:{
 			width: 3,
 			shape: "spline",
@@ -172,7 +182,7 @@ var graph = {
       },
       {
 		name:        "new",
-		type:		 "scatter",
+		type:		 "surface",
         color:       "hsl(30, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -180,6 +190,8 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		fill: "",
+		fillcolor: "",
 		line:{
 			width: 3,
 			shape: "spline",
@@ -202,7 +214,7 @@ var graph = {
       },
       {
 		name:        "smth",
-		type:		 "scatter",
+		type:		 "surface",
         color:       "hsl(80, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -210,6 +222,8 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		fill: "",
+		fillcolor: "",
 		line:{
 			width: 3,
 			shape: "spline",
@@ -232,7 +246,7 @@ var graph = {
       },
       {
 		name:        "here",
-		type:		 "scatter",
+		type:		 "surface",
         color:       "hsl(50, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -240,6 +254,8 @@ var graph = {
 		opacity: 1,
 		text: "huehue",
 		mode: "lines+text",
+		fill: "",
+		fillcolor: "",
 		line:{
 			width: 6,
 			shape: "spline",
@@ -259,29 +275,77 @@ var graph = {
 				color: "",
 			},
 		}
-      }
+      }*/
     ]
   }
 };
 
-//		Here's the data
-var data = {
+	//	Here's the data
+/*var data = {
   datapoints: {
     groups: [{
+	  xval: ["fft","mmult","tar","etc"],
       series: [20, 40, 90,75]
     }, {
+      xval: ["fft","mmult","tar","etc"],
       series: [73, 32,  76,70]
     }, {
+      xval: ["fft","mmult","tar","etc"],
       series: [13, 64,  64,26]
     }, {
+      xval: ["fft","mmult","tar","etc"],
       series: [22, 52,  70,18]
     }, {
+      xval: ["fft","mmult","tar","etc"],
       series: [34, 36,  50,10]
     }, {
+      xval: ["gj","mmultjg","tarjr","etjc"],
       series: [60, 31,  49,60]
     }]
   }
+};*/
+
+//	data for heatmap/contour/surface
+var data = {
+  datapoints: {
+    groups: [{
+	  xval: [45,56,73,80],
+      series: [12,22,62,70],
+	  z: [[12,20,16,40],[18,14,32,12],[29,23,10,5],[45,45,45,45]]
+    }]
+  }
 };
+
+//	data for scatter3d/bubble3d
+/*var data = {
+  datapoints: {
+    groups: [{
+	  xval: [35,50,20,20],
+      series: [20, 40, 90,75],
+	  z: [48,14,30,78]
+    }, {
+      xval: [54,32,65,10],
+      series: [73, 32,  76,70],
+	  z: [15,40,60,37]
+    }, {
+      xval: [45,22,85,16],
+      series: [13, 64,  64,26],
+	  z: [90,83,30,67]
+    }, {
+      xval: [12,62,45,78],
+      series: [22, 52,  70,18],
+	  z: [51,34,98,45]
+    }, {
+      xval: [45,21,90,13],
+      series: [34, 36,  50,10],
+	  z: [32,72,43,50]
+    }, {
+      xval: [24,54,23,60],
+      series: [60, 31,  49,60],
+	  z: [16,30,67,21]
+    }]
+  }
+};*/
 
 function setData(description, data){
   var dataArray = [];
@@ -321,7 +385,7 @@ function setData(description, data){
   for(var i=0;i<m;i++){
 	  var dataElement = {};
 	  
-	  dataElement.x = x;						// Assigning X values to one data object
+	  dataElement.x = data[i].xval;//x;						// Assigning X values to one data object
 	  dataElement.y = data[i].series;			// Assigning Y values
 	  dataElement.type = type[i];				// "scatter" - line; "bar" - bar
 	  dataElement.name = legend_labels[i];	//  line and legend name
@@ -335,7 +399,7 @@ function setData(description, data){
 	  dataElement.text = text[i];				//	text to display on data element
 	  dataElement.mode = mode[i];				//  any combination of "lines" "markers" "text" joined with "+" or "none"
 	  //------line options ----------------
-	  if(type[i] == "scatter" || !type){
+	  if(type[i] == "scatter" || !type[i]){
 		dataElement.line = {};
 		dataElement.line.color = line_colors[i];		// line color
 		dataElement.line.width = groups[i].line.width;
@@ -355,14 +419,12 @@ function setData(description, data){
 		dataElement.orientation = groups[i].bar.orientation;			// "h" | "v"  orientation of the bars
 		dataElement.marker = {};
 		dataElement.marker.color = groups[i].bar.marker.color;
+		dataElement.marker.line = {};
+		dataElement.marker.line.color = "red";
+		dataElement.marker.line.width = 8;
 	  }
-	  if(type == "heatmap"){
-		var z = [2];
-		var test = [20,40,75,90];
-		var test2 = [50,65,85,100];
-		z[0] = test;
-		z[1] = test2;
-		dataElement.z = z;
+	  if(type[i] == "heatmap"){
+		dataElement.z = data[i].z;
 	  }
 	  if(type == "histogram"){
 		
@@ -374,27 +436,24 @@ function setData(description, data){
 		
 	  }
 	  if(type == "contour"){
-		var z = [2];
-		var test = [20,40,75,90];
-		var test2 = [50,65,85,100];
-		z[0] = test;
-		z[1] = test2;
-		dataElement.z = z;
+		dataElement.z = data[i].z;
 	  }
 	  if(type == "histogram2dcontour"){
 		
 	  }
-	  if(type == "scatter3d"){
-		dataElement.x = [35,44,57,70];
-		var z = [10,25,50,75];
-		//var test = [10,25,50,75];
-		//var test2 = [50,65,85,100];
-		//z[0] = test;
-		//z[1] = test2;
-		dataElement.z = z;
+	  if(type[i] == "scatter3d" || type[i] == "bubble3d"){
+		dataElement.z = data[i].z;
+		if(type[i] == "bubble"){
+			dataElement.type = "scatter3d";
+			dataElement.mode = "markers+text";
+			dataElement.marker = {};
+			dataElement.marker.opacity = groups[i].line.marker.opacity;
+			dataElement.marker.size = 15//groups[i].line.marker.size;
+			dataElement.marker.color = groups[i].line.marker.color;
+		}
 	  }
-	  if(type == "surface"){
-		
+	  if(type[i] == "surface"){
+		dataElement.z = data[i].z;
 	  }
 	  if(type == "mesh3d"){
 		
@@ -406,9 +465,6 @@ function setData(description, data){
 		
 	  }
 	  if(type == "scattergl"){
-		
-	  }
-	  if(type == "area"){
 		
 	  }
 	  if(type == "layout"){
