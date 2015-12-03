@@ -81,21 +81,33 @@ var graph = {
 		//  any combination of "lines" "markers" "text" joined with "+" or "none"
 		mode: "",
 		
+		//	Any combination of "x", "y", "z", "text", "name", "label"(pie) joined with a "+" OR "all" or "none"
+		hoverinfo: "label",
+		
 		//	fill area "none" | "tozeroy" | "tozerox" | "tonexty" | "tonextx" )
 		fill: "",
 		
 		// fill color
 		filcolor: "",
 		
-		//	line
-		line:{
-			width: 3,
-			//	"linear" | "spline" | "hv" | "vh" | "hvh" | "vhv"
-			shape: "spline",
-			//  only for "spline", 0-1.3
-			smoothing: "1",
-			//  String, default "solid", set to dash type or pixel length
-			dash: "5",
+		stream:{
+			//	stream id
+			token: "",
+			//	max number of points to dislay
+			maxpoints: 50,
+		},
+		
+		//	scatter
+		scatter:{
+			line:{
+				width: 3,
+				//	"linear" | "spline" | "hv" | "vh" | "hvh" | "vhv"
+				shape: "spline",
+				//  only for "spline", 0-1.3
+				smoothing: "1",
+				//  String, default "solid", set to dash type or pixel length
+				dash: "5",
+			},
 			//	Boolean; if gaps ({nan} or missing values) in data arrays are connected
 			connectgaps: true,
 			//	markers
@@ -104,6 +116,7 @@ var graph = {
 				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
 		
@@ -114,11 +127,31 @@ var graph = {
 			marker:{
 				color: "",
 			},
-		}
+		},
+		
+		//	pie
+		
+		pie:{
+			labels: ["Label 1","Label 2","Label 3","Label 4"],
+			marker:{
+				colors: ["yellow","green","blue","orange"],
+				line:{
+					color: "red",
+					width: 2,
+				}
+			},
+			scalegroup: "",
+		},
+		
+		//	heatmap
+		
+		heatmap:{
+			transpose: false,
+		},
       },
       /*{
 		name:        "clang clang clang",
-		type:		 "surface",
+		type:		 "scatter",
         color:       "hsl(0, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -126,21 +159,26 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		hoverinfo: "",
 		fill: "",
 		fillcolor: "",
-		line:{
-			width: 3,
-			shape: "spline",
-			smoothing: "1",
-			dash: "solid",
+		scatter:{
+			line:{
+				width: 3,
+				shape: "spline",
+				smoothing: "1",
+				dash: "solid",
+			},
 			connectgaps: true,
 			marker:{
 				symbol: "0",
 				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
+		
 		bar:{
 			orientation: "v",
 			marker:{
@@ -150,7 +188,7 @@ var graph = {
       },
       {
 		name:        "msc",
-		type:		 "surface",
+		type:		 "scatter",
         color:       "hsl(180, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -158,19 +196,23 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		hoverinfo: "",
 		fill: "",
 		fillcolor: "",
-		line:{
-			width: 3,
-			shape: "spline",
-			smoothing: "1",
-			dash: "solid",
+		scatter:{
+			line:{
+				width: 3,
+				shape: "spline",
+				smoothing: "1",
+				dash: "solid",
+			},
 			connectgaps: true,
 			marker:{
 				symbol: "0",
 				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
 		bar:{
@@ -182,7 +224,7 @@ var graph = {
       },
       {
 		name:        "new",
-		type:		 "surface",
+		type:		 "scatter",
         color:       "hsl(30, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -190,19 +232,23 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		hoverinfo: "",
 		fill: "",
 		fillcolor: "",
-		line:{
-			width: 3,
-			shape: "spline",
-			smoothing: "1",
-			dash: "solid",
+		scatter:{
+			line:{
+				width: 3,
+				shape: "spline",
+				smoothing: "1",
+				dash: "solid",
+			},
 			connectgaps: true,
 			marker:{
 				symbol: "0",
 				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
 		bar:{
@@ -214,7 +260,7 @@ var graph = {
       },
       {
 		name:        "smth",
-		type:		 "surface",
+		type:		 "scatter",
         color:       "hsl(80, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -222,19 +268,23 @@ var graph = {
 		opacity: 1,
 		text: "",
 		mode: "",
+		hoverinfo: "",
 		fill: "",
 		fillcolor: "",
-		line:{
-			width: 3,
-			shape: "spline",
-			smoothing: "1",
-			dash: "solid",
+		scatter:{
+			line:{
+				width: 3,
+				shape: "spline",
+				smoothing: "1",
+				dash: "solid",
+			},
 			connectgaps: true,
 			marker:{
 				symbol: "0",
-				opacity: 0.5,
+				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
 		bar:{
@@ -246,7 +296,7 @@ var graph = {
       },
       {
 		name:        "here",
-		type:		 "surface",
+		type:		 "scatter",
         color:       "hsl(50, 60%, 60%)",
 		visible:	 true,
 		showlegend:	 true,
@@ -254,19 +304,23 @@ var graph = {
 		opacity: 1,
 		text: "huehue",
 		mode: "lines+text",
+		hoverinfo: "",
 		fill: "",
 		fillcolor: "",
-		line:{
-			width: 6,
-			shape: "spline",
-			smoothing: "1",
-			dash: "solid",
+		scatter:{
+			line:{
+				width: 3,
+				shape: "spline",
+				smoothing: "1",
+				dash: "solid",
+			},
 			connectgaps: true,
 			marker:{
 				symbol: "0",
 				opacity: 1,
 				size: 8,
 				color: "",
+				maxdisplayed: 0,
 			},
 		},
 		bar:{
@@ -299,7 +353,7 @@ var graph = {
       xval: ["fft","mmult","tar","etc"],
       series: [34, 36,  50,10]
     }, {
-      xval: ["gj","mmultjg","tarjr","etjc"],
+      xval: ["fft","mmult","tar","etc"],
       series: [60, 31,  49,60]
     }]
   }
@@ -398,21 +452,22 @@ function setData(description, data){
 	  dataElement.stream.maxpoints = 50;	//	max points to display
 	  dataElement.text = text[i];				//	text to display on data element
 	  dataElement.mode = mode[i];				//  any combination of "lines" "markers" "text" joined with "+" or "none"
+	  dataElement.hoverinfo = groups[i].hoverinfo;
 	  //------line options ----------------
 	  if(type[i] == "scatter" || !type[i]){
 		dataElement.line = {};
 		dataElement.line.color = line_colors[i];		// line color
-		dataElement.line.width = groups[i].line.width;
-		dataElement.line.shape = groups[i].line.shape;		//	"linear" | "spline" | "hv" | "vh" | "hvh" | "vhv"
-		dataElement.line.smoothing = groups[i].line.smoothing;		//  only for "spline", 0-1.3
-		dataElement.line.dash = groups[i].line.dash;			//  String, default "solid", set to dash type or pixel length
-		dataElement.connectgaps = groups[i].line.connectgaps;		//	Boolean; if gaps ({nan} or missing values) in data arrays are connected
+		dataElement.line.width = groups[i].scatter.line.width;
+		dataElement.line.shape = groups[i].scatter.line.shape;		//	"linear" | "spline" | "hv" | "vh" | "hvh" | "vhv"
+		dataElement.line.smoothing = groups[i].scatter.line.smoothing;		//  only for "spline", 0-1.3
+		dataElement.line.dash = groups[i].scatter.line.dash;			//  String, default "solid", set to dash type or pixel length
+		dataElement.connectgaps = groups[i].scatter.connectgaps;		//	Boolean; if gaps ({nan} or missing values) in data arrays are connected
 		
 		dataElement.marker = {};
-		dataElement.marker.symbol = groups[i].line.marker.symbol;
-		dataElement.marker.opacity = groups[i].line.marker.opacity;
-		dataElement.marker.size = groups[i].line.marker.size;
-		dataElement.marker.color = groups[i].line.marker.color;
+		dataElement.marker.symbol = groups[i].scatter.marker.symbol;
+		dataElement.marker.opacity = groups[i].scatter.marker.opacity;
+		dataElement.marker.size = groups[i].scatter.marker.size;
+		dataElement.marker.color = groups[i].scatter.marker.color;
 	  }
 	  //--------bar options ---------------
 	  if(type[i] == "bar"){
@@ -425,15 +480,22 @@ function setData(description, data){
 	  }
 	  if(type[i] == "heatmap"){
 		dataElement.z = data[i].z;
+		dataElement.transpose = groups[i].heatmap.transpose;
 	  }
 	  if(type == "histogram"){
-		
+		dataElement.x = data[i].series;
 	  }
 	  if(type == "histogram2d"){
 		
 	  }
-	  if(type == "pie"){
-		
+	  if(type[i] == "pie"){
+		dataElement.values = data[i].series;
+		dataElement.labels = groups[i].pie.labels;
+		dataElement.marker = {};
+		dataElement.marker.colors = groups[i].pie.marker.colors;
+		dataElement.marker.line = {};
+		dataElement.marker.line.color = groups[i].pie.marker.line.color;
+		dataElement.marker.line.width = groups[i].pie.marker.line.width;
 	  }
 	  if(type == "contour"){
 		dataElement.z = data[i].z;
@@ -443,7 +505,7 @@ function setData(description, data){
 	  }
 	  if(type[i] == "scatter3d" || type[i] == "bubble3d"){
 		dataElement.z = data[i].z;
-		if(type[i] == "bubble"){
+		if(type[i] == "bubble3d"){
 			dataElement.type = "scatter3d";
 			dataElement.mode = "markers+text";
 			dataElement.marker = {};
@@ -455,8 +517,9 @@ function setData(description, data){
 	  if(type[i] == "surface"){
 		dataElement.z = data[i].z;
 	  }
+	  //	6 data arrays x,y,z,i,j,k
 	  if(type == "mesh3d"){
-		
+		dataElement.z = data[i].z;
 	  }
 	  if(type == "scattergeo"){
 		
